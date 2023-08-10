@@ -9,17 +9,17 @@ import EditProfile from './components/Profile/EditProfile';
 import ProtectedRoutes from './ProtectedRoutes';
 const Routing = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<Main></Main>}>
-          <Route index element={<Home></Home>}></Route>
-          <Route path='login' element={<Login></Login>}></Route>
-          <Route path='signup' element={<Signup></Signup>}></Route>
-          <Route path='search' element={<Search></Search>}></Route>
-          <Route path='editprofile' element={<ProtectedRoutes><EditProfile></EditProfile></ProtectedRoutes>}></Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<Main></Main>}>
+            <Route index element={<Home></Home>}></Route>
+            <Route path='login' element={<Login></Login>}></Route>
+            <Route path='signup' element={<Signup></Signup>}></Route>
+            <Route path='search' element={<ProtectedRoutes><Search></Search></ProtectedRoutes>}></Route>
+            <Route path='editprofile' element={<ProtectedRoutes><EditProfile></EditProfile></ProtectedRoutes>}></Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
   )
 }
 

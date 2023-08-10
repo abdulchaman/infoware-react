@@ -4,6 +4,7 @@ import Footer from '../Footer';
 const url = "https://phpwebdevelopmentservices.com/project-react-backend/api/edit-profile";
 
 const EditProfile = () => {
+    const [profileData, setProfileData] = useState({});
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -31,12 +32,6 @@ const EditProfile = () => {
         const imageFile = event.target.files[0];
         setSelectedImage(imageFile);
     };
-    const handleUpload = async () => {
-        if (!selectedImage) {
-            alert('Please select an image.');
-            return;
-        }
-    }
 
 
     const handleCheckboxChange = (event) => {
@@ -67,7 +62,7 @@ const EditProfile = () => {
         const allErrors = {
             ...emptyFieldErrors
         };
-        console.log(name, email, phone, dob, aboutMe, selectGender, selectedCheckboxes, language, selectedImage)
+        console.log(name, email, phone, dob, aboutMe, selectGender, selectedCheckboxes, language, selectedImage, currentPassword, newPassword, confPassword)
         const authToken = sessionStorage.getItem('ltk') ? sessionStorage.getItem('ltk') : sessionStorage.getItem('rtk');
 
         try {
@@ -96,10 +91,10 @@ const EditProfile = () => {
                 },
                 method: 'POST',
                 body: formData,
-                
+
             }).then(res => res.json()).then(result => {
                 if (result.error) {
-                    console.log(result.error)
+                    // console.log(result.error)
                     let errorType = result.error;
                     errorType = Object.values(errorType)
                     // console.log(errorType)
@@ -132,8 +127,9 @@ const EditProfile = () => {
                     setError(allErrors);
                 }
                 else {
-                    console.log("elseblock", result);
-                    setMessage("Profile updated successfully")
+                    console.log("successblock", result);
+                    setMessage("Profile updated successfully");
+                    setProfileData(result);
                 }
                 // console.log(result)
             })
@@ -388,7 +384,7 @@ const EditProfile = () => {
                                                                 </div>
                                                             </div>
 
-                                                            <div class="col-sm-12">
+                                                            {/* <div class="col-sm-12">
                                                                 <div class="form_fild_area_m frm_grp arro">
                                                                     <label>Language </label>
                                                                     <select
@@ -401,7 +397,7 @@ const EditProfile = () => {
                                                                         <option value="odiya">Odiya</option>
                                                                     </select>
                                                                 </div>
-                                                            </div>
+                                                            </div> */}
 
                                                             <div class="col-sm-12">
                                                                 <div class="uplodimg">
@@ -415,7 +411,7 @@ const EditProfile = () => {
 
                                                                         />
                                                                         <label for="file-1"
-                                                                            onClick={handleUpload}
+
                                                                         >Click here to Upload Profile Image<img src="assets/images/clickhe.png" alt="" /></label>
                                                                     </div>
                                                                     <div class="uplodimgfilimg">
@@ -499,7 +495,7 @@ const EditProfile = () => {
                                                                         <label>Confirm password</label>
                                                                         <input type="password"
                                                                             placeholder="Enter here"
-                                                                            name=""
+                                                                            name="confPassword"
                                                                             value={confPassword}
                                                                             onChange={(e) => setConfPassword(e.target.value)}
                                                                         />

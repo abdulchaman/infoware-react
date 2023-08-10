@@ -1,34 +1,95 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Header from '../Header';
 import Footer from '../Footer';
-import axios from "axios";
-
-const url = "https://phpwebdevelopmentservices.com/project-react-backend/api/search-data";
 
 const Search = () => {
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    const [keyword, setKeyword] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [filteredCategories, setFilteredCategories] = useState([]);
 
     const authToken = useMemo(() => {
         return sessionStorage.getItem('ltk')
     }, []);
 
-    const handleSearch = (event) => {
-        if (event.target.value) {
-            setKeyword(event.target.value);
 
-            const url = 'https://phpwebdevelopmentservices.com/project-react-backend/api/common-data';
-            fetch(url, {
-                headers: {
-                    'X-CSRF-TOKEN': authToken,
-                    'Authorization': `Bearer ${authToken}`
-                },
-                method: 'POST'
-            }).then(res => res.json()).then(result => { console.log(result) })
+    const handleProduct = (data) => {
+        if (data) {
+            return data.map((item) => {
+                return (
+                    <div className="search_proo" key={item.id}>
+                        <div className="srch_pic_box">
+                            <img src={item.image} alt={item.name} />
+                            <span><a href="#">Call For Enquiry</a></span>
+                        </div>
+                        <div className="srch_dtls_box">
+                            <a href="#">{item.name}</a>
+                            <p>Rs.40.00</p>
+                        </div>
+                    </div>)
+            })
         }
     }
 
+    const displayCategory = (data) => {
+        if (data) {
+            return data.map((item) => {
+                return (
+                    <option value={item.id} key={item.id}>{item.name}</option>
+                )
+            })
+        }
+    }
 
+    const handleCategoryChange = (event) => {
+        const selectedCategoryId = parseInt(event.target.value);
+        const selectedCat = categories.find(cat => cat.id === selectedCategoryId);
+        setSelectedCategory(selectedCat);
+    };
+
+    const handleSearchInputChange = (event) => {
+        const keyword = event.target.value;
+        // console.log(keyword)
+        setSearchKeyword(keyword);
+        const filtered = categories.filter((category) => {
+            return (category.name.toLowerCase().includes(keyword.toLowerCase()))
+        })
+
+        setFilteredCategories(filtered);
+    };
+    
+    const handleSelectedCategory = (selectedCategory) => {
+        if (selectedCategory) {
+            return selectedCategory.sub_categories.map((subcategory) => {
+                return (
+                    <li key={subcategory.id}>
+                        <label className="contect_container_checkBox">{subcategory.name}
+                            <input type="checkbox" name="text" />
+                            <span className="contect_checkmark"></span>
+                        </label>
+                    </li>
+                )
+            }
+            )
+        }
+    }
+    useEffect(() => {
+        fetch('https://phpwebdevelopmentservices.com/project-react-backend/api/common-data', {
+            headers: {
+                'accept': 'application/json',
+                'X-CSRF-TOKEN': authToken,
+            },
+            method: 'POST'
+        })
+            .then(res => res.json())
+            .then(result => {
+                let categories = result.result.categories;
+                console.log(categories);
+                setCategories(categories);
+                setSelectedCategory(categories[0]);
+                setFilteredCategories(categories);
+            })
+    }, [])
     return (
         <>
             <div className='wrapper'>
@@ -44,7 +105,7 @@ const Search = () => {
                             </div>
 
                             <div className="mobile_filter"> <i className="fa fa-filter" aria-hidden="true"></i><p>Show Filter</p></div>
-
+                            {/* left */}
                             <div className="laft_search_panel">
                                 <h3>Filter Options</h3>
 
@@ -53,59 +114,23 @@ const Search = () => {
                                         placeholder="Keyword"
                                         type="text"
                                         className="search-input"
-                                        value={keyword}
-                                        onChange={handleSearch} />
+                                        value={searchKeyword}
+                                        onChange={handleSearchInputChange}
+                                    />
                                     <img src="assets/images/icon36.png" className="search_icon" />
                                 </div>
-
                                 <div className="form_group">
                                     <label className="search_label">Category</label>
-                                    <select className="slectt">
-                                        <option>Vegetable</option>
-                                        <option>Fruits</option>
-                                        <option>Dairy products</option>
-                                        <option>Organic Products</option>
-                                        <option>Grocery Items</option>
+                                    <select className="slectt" onChange={handleCategoryChange}>
+                                        {displayCategory(categories)}
                                     </select>
                                 </div>
-
                                 <div className="form_group">
                                     <label className="search_label">Sub Category</label>
                                     <ul className="c_ul">
-                                        <li>
-                                            <label className="contect_container_checkBox">Sub Category one
-                                                <input type="checkbox" checked="checked" name="text" />
-                                                <span className="contect_checkmark"></span>
-                                            </label>
-                                        </li>
-                                        <li>
-                                            <label className="contect_container_checkBox">Sub Category two
-                                                <input type="checkbox" checked="checked" name="text" />
-                                                <span className="contect_checkmark"></span>
-                                            </label>
-                                        </li>
-                                        <li>
-                                            <label className="contect_container_checkBox">Sub Category
-                                                <input type="checkbox" checked="checked" name="text" />
-                                                <span className="contect_checkmark"></span>
-                                            </label>
-                                        </li>
-                                        <li>
-                                            <label className="contect_container_checkBox">Sub Categoru name here
-                                                <input type="checkbox" checked="checked" name="text" />
-                                                <span className="contect_checkmark"></span>
-                                            </label>
-                                        </li>
-                                        <li>
-                                            <label className="contect_container_checkBox">Sub Category
-                                                <input type="checkbox" checked="checked" name="text" />
-                                                <span className="contect_checkmark"></span>
-                                            </label>
-                                        </li>
+                                        {handleSelectedCategory(selectedCategory)}
                                     </ul>
                                 </div>
-
-
                                 <div className="form_group">
                                     <label className="search_label">Price Range</label>
                                     <div className="slider_rnge">
@@ -119,13 +144,10 @@ const Search = () => {
                                         </span>
                                     </div>
                                 </div>
-
                                 <button type="submit" className="search-submit1">Filter</button>
-
                             </div>
-                            {/* <!----> */}
 
-                            {/* <!--right--> */}
+                            {/* right */}
                             <div className="right_search_panel">
 
                                 <div className="evnt_shot_by_main">
@@ -139,238 +161,9 @@ const Search = () => {
                                         </select>
                                     </div>
                                 </div>
-
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search01.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.40.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search02.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.20.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search03.JPG" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.40.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search04.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.30.00</p>
-                                    </div>
-                                </div>
-
-
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search05.png" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search06.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search07.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search08.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search09.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search10.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search11.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search12.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search01.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.40.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search02.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.20.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search03.JPG" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.40.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search04.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.30.00</p>
-                                    </div>
-                                </div>
-
-
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search05.png" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search06.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search07.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-                                <div className="search_proo">
-                                    <div className="srch_pic_box">
-                                        <img src="assets/images/search08.jpg" alt="" />
-                                        <span><a href="#">Call For Enquiry</a></span>
-                                    </div>
-                                    <div className="srch_dtls_box">
-                                        <a href="#">Fresh Onion</a>
-                                        <p>Rs.80.00</p>
-                                    </div>
-                                </div>
-
-
+                                {/* display products */}
+                                {handleProduct(filteredCategories)}
                                 <div className="w-100"></div>
-
                                 <div className="pagination_area">
                                     <ul>
                                         <li><a href="#"><i className="fa fa-angle-left" aria-hidden="true"></i> </a></li>
@@ -384,13 +177,14 @@ const Search = () => {
                                     </ul>
                                 </div>
                             </div>
-
-
                         </div>
+
+
                     </div>
                 </div>
                 <Footer></Footer>
             </div>
+
         </>
     )
 }

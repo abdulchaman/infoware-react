@@ -6,14 +6,17 @@ const Header = () => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState();
     const ConditionalHeader = () => {
-        if (sessionStorage.getItem('ltk') !== null || sessionStorage.getItem('rtk')) {
+        if (sessionStorage.getItem('ltk') !== null) {
             let logName = sessionStorage.getItem('logData');
             let regName = sessionStorage.getItem('regIn')
             sessionStorage.setItem('loginStatus', "LoggedIn");
             return (
                 <>
                     <li className="nav-item">
-                        <Link className="nav-link" to="/editprofile">Hi {logName || regName}</Link>
+                        <Link className="nav-link" to="/search">Search</Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/editprofile">Edit profile</Link>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link nav-logout" onClick={handleLogOut}>Log out</a>
